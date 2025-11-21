@@ -4,7 +4,7 @@ A responsive **Single Page Application (SPA)** built using **HTML, CSS, and Vani
 The app allows users to **add, edit, delete, filter, and view recipes**, with all data stored in **localStorage**.
 
 Live Website:  
-👉 https://abhinavtiwari11.github.io/abhinav-recipe-app/
+👉 https://abhinavtiwari11.github.io/Abhinav-recipe/
 
 ---
 
