@@ -291,6 +291,16 @@ if (controlsBar && maxTimeFilter) {
 } else if (controlsBar) {
   controlsBar.appendChild(vegFilter);
 }
+vegFilter.addEventListener("change", () => {
+  if (vegFilter.value === "Veg") {
+    vegFilter.style.color = "green";
+  } else if (vegFilter.value === "Non-Veg") {
+    vegFilter.style.color = "red";
+  } else {
+    vegFilter.style.color = "black";
+  }
+});
+vegFilter.style.color = "black";
 
 const homeView = qs("#homeView");
 const detailView = qs("#detailView");
@@ -319,21 +329,31 @@ function renderGrid(list) {
   list.forEach((r) => {
     const card = document.createElement("div");
     card.className = "card";
+
+    // FIX ADDED BELOW
+    card.dataset.id = r.id;
+
     if (r.imageUrl)
       card.innerHTML = `<img src="${r.imageUrl}" alt="${r.title}">`;
-    card.innerHTML += `<h3>${r.title}</h3><p>${r.description}</p>
+    card.innerHTML += `
+      <h3>${r.title}</h3>
+      <p>${r.description}</p>
+
       <div class="recipe-meta">
         <span class="tag">${r.type || "Veg"}</span>
         <span class="tag">${r.difficulty}</span>
         <span class="tag">Prep: ${formatTime(r.prepTime)}</span>
       </div>
+
       <div class="actions">
         <button class="btn view" data-id="${r.id}">View</button>
         <button class="btn edit" data-id="${r.id}">Edit</button>
       </div>`;
+      
     recipesGrid.appendChild(card);
   });
 }
+
 
 /* --- Filters & Search --- */
 function applyFilters() {
@@ -361,11 +381,22 @@ function showView(view) {
 
 /* --- Handlers --- */
 function onGridClick(e) {
-  const id = e.target.dataset.id;
+  const id =
+    e.target.dataset.id ||
+    e.target.closest(".card")?.dataset.id;
+
   if (!id) return;
-  if (e.target.classList.contains("view")) openDetail(id);
-  if (e.target.classList.contains("edit")) openFormForEdit(id);
+
+  if (e.target.classList.contains("edit")) {
+    openFormForEdit(id);
+  } else if (e.target.classList.contains("view")) {
+    openDetail(id);
+  } else {
+    // Clicking any empty area of the card opens detail
+    openDetail(id);
+  }
 }
+
 
 function openDetail(id) {
   const r = recipes.find((x) => x.id === id);
