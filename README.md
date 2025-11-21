@@ -11,7 +11,7 @@ Live Website:
 ## 📂 Source Code
 
 GitHub Repository:  
-👉 https://github.com/abhinavtiwari11/abhinav-recipe-app
+👉 https://github.com/abhinavtiwari11/Abhinav-recipe.git
 
 
 ---
