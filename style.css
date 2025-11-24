@@ -36,7 +36,6 @@ body {
   background: #12343b;
   padding: 20px;
   box-shadow: var(--shadow);
-  position: sticky;
   top: 0;
   z-index: 20;
 }
