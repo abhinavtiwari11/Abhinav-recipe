@@ -1,6 +1,4 @@
-/* ============================
-   CONFIG + HELPERS
-============================ */
+
 const STORAGE_KEY = "recipes_v1";
 
 const qs = (sel) => document.querySelector(sel);
