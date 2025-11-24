@@ -105,7 +105,7 @@ Portfolio: https://abhinavtiwari11.github.io/portfolio
 ## 📷 SCREENSHOT 
 
 ### HOMEPAGE
-<img src="HOMEPAGE.png" width="40%">
+<img src="HomePage.png" width="40%">
 
 ### ADD 
 <img src="ADD.png" width="40%">
