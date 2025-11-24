@@ -1,6 +1,6 @@
 # 🍽️ Recipe Manager App
 
-A responsive **Single Page Application (SPA)** built using **HTML, CSS, and Vanilla JavaScript**.  
+A responsive **Single Page Application (SPA)** built using **HTML, CSS, and  JavaScript**.  
 The app allows users to **add, edit, delete, filter, and view recipes**, with all data stored in **localStorage**.
 
 Live Website:  
