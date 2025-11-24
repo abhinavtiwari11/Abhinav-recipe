@@ -4,14 +4,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
 :root {
-    --bg: #f2f4f8;
-    --card-bg: #ffffff;
-    --accent: #4b6bfb;
-    --accent-dark: #2444d4;
+  --bg: #f2f4f8;
+  --card-bg: #ffffff;
+  --accent: #4b6bfb;
+  --accent-dark: #2444d4;
   --text: #1f2937;
   --muted: #6b7280;
   --radius: 14px;
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+  --veg: #22c55e;
+  --nonveg: #ef4444;
 }
 
 * {
@@ -22,16 +25,15 @@
 }
 
 body {
-    background: #c89666;
-    color: var(--text);
-    padding: 0;
+  background: #c89666;
+  color: var(--text);
 }
 
 /* ================================
    Header
 ================================ */
 .site-header {
-    background: #12343b;
+  background: #12343b;
   padding: 20px;
   box-shadow: var(--shadow);
   position: sticky;
@@ -71,8 +73,7 @@ body {
 }
 
 #addRecipeBtn:hover {
-  background:#c80909;
-
+  background: #c80909;
 }
 
 /* ================================
@@ -92,6 +93,7 @@ body {
   padding: 18px;
   box-shadow: var(--shadow);
   transition: 0.2s ease;
+  cursor: pointer;
 }
 
 .card:hover {
@@ -117,6 +119,7 @@ body {
   margin-bottom: 10px;
 }
 
+/* Meta Tags */
 .recipe-meta {
   display: flex;
   gap: 10px;
@@ -128,6 +131,16 @@ body {
   padding: 4px 10px;
   border-radius: var(--radius);
   font-size: 12px;
+}
+
+.tag.veg {
+  background: var(--veg);
+  color: white;
+}
+
+.tag.nonveg {
+  background: var(--nonveg);
+  color: white;
 }
 
 /* ================================
@@ -152,8 +165,8 @@ body {
 }
 
 .btn.edit {
-
-    background: #c80909;
+  background: #c80909;
+  color: white;
 }
 
 .btn.delete {
@@ -206,6 +219,77 @@ body {
 }
 
 /* ================================
+   Review Section
+================================ */
+.review-card {
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.review-card strong {
+  font-size: 16px;
+  color: #f59e0b;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* ================================
+   Review Popup
+================================ */
+#reviewPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.popup.hidden {
+  display: none !important;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  width: 340px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.25s ease;
+}
+
+.popup-content h3 {
+  margin-bottom: 10px;
+}
+
+.popup-content select,
+.popup-content textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.popup-actions .btn {
+  width: 48%;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: scale(0.95);}
+  to {opacity: 1; transform: scale(1);}
+}
+
+/* ================================
    Form UI
 ================================ */
 .form {
@@ -245,6 +329,15 @@ body {
   margin-top: 2px;
 }
 
+.hidden {
+  display: none;
+}
+
+/* Highlight invalid fields */
+input:invalid, textarea:invalid, select:invalid {
+  border-color: red;
+}
+
 /* ================================
    Footer
 ================================ */
@@ -254,13 +347,54 @@ body {
   color: var(--muted);
   margin-top: 40px;
 }
-.hidden {
+
+/* ================================
+   Review Popup (FIXED)
+================================ */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+}
+
+.popup.hidden {
   display: none;
 }
 
-/* Add invalid field highlight */
-input:invalid, textarea:invalid, select:invalid {
-  border-color: red;
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  animation: popupIn 0.2s ease;
 }
 
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.popup-content select,
+.popup-content textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+@keyframes popupIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 
