@@ -3,30 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recipe Manager </title>
+  <title>Recipe Manager</title>
+
+  <!-- local CSS (user uploaded) -->
   <link rel="stylesheet" href="style.css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header class="site-header">
     <h1> 🍽️ Recipe Manager App </h1>
     <div class="controls">
       <input id="searchInput" type="search" placeholder="Search recipes by title..." />
-      <select id="difficultyFilter">
+      <select id="difficultyFilter"> Difficulty
         <option value="All">All</option>
         <option value="Easy">Easy</option>
         <option value="Medium">Medium</option>
         <option value="Hard">Hard</option>
-        
       </select>
       <input id="maxTimeFilter" type="number" min="0" placeholder="Max prep time (min)" />
       <button id="addRecipeBtn">+ Add Recipe</button>
     </div>
   </header>
 
+  <!-- Home / Grid -->
   <main id="homeView" class="view">
     <section id="recipesGrid" class="grid"></section>
-    
-    </div>
   </main>
 
   <!-- Detail View -->
@@ -40,6 +43,7 @@
     <button class="backBtn" id="cancelFormBtn">← Cancel</button>
     <form id="recipeForm" class="card form">
       <h2 id="formTitle">Add Recipe</h2>
+
       <div class="field">
         <label>Title *</label>
         <input name="title" id="title" required minlength="3" maxlength="50" />
@@ -100,10 +104,35 @@
     </form>
   </main>
 
+  <!-- Shared Review Popup (single instance) -->
+  <div id="reviewPopup" class="popup hidden" aria-hidden="true">
+    <div class="popup-content">
+      <h3 id="popupTitle">Add Review</h3>
+
+      <label for="reviewRating">Rating (1–5)</label>
+      <select id="reviewRating" aria-label="Rating">
+        <option value="1">1 ⭐</option>
+        <option value="2">2 ⭐</option>
+        <option value="3">3 ⭐</option>
+        <option value="4">4 ⭐</option>
+        <option value="5">5 ⭐</option>
+      </select>
+
+      <label for="reviewText">Your Review</label>
+      <textarea id="reviewText" rows="4" placeholder="Share what you liked..."></textarea>
+
+      <div class="popup-actions">
+        <button id="saveReviewBtn" class="btn view">💬 Submit</button>
+        <button id="closeReviewBtn" class="btn delete">✖ Close</button>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
-    <small>Ⓒ Abhinav Tiwari Recipe Manager App — All Rights Reserved<small>
+    <small>Ⓒ Abhinav Tiwari Recipe Manager App — All Rights Reserved</small>
   </footer>
 
+  <!-- local JS (user uploaded) - updated app.js will be uploaded to this path -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
