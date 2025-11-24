@@ -1,4 +1,4 @@
-# 🍽️ Abhinav Recipe App
+# 🍽️ Recipe Manager App
 
 A responsive **Single Page Application (SPA)** built using **HTML, CSS, and Vanilla JavaScript**.  
 The app allows users to **add, edit, delete, filter, and view recipes**, with all data stored in **localStorage**.
@@ -16,18 +16,15 @@ GitHub Repository:
 
 ---
 
-## ▶️ How to Run the App
+## ▶️ Features
 
-### **Option 1 — Open Locally**
-1. Download or clone the repository  
-2. Open `index.html` in any modern browser  
-3. The app runs instantly — no server required  
-
-### **Option 2 — GitHub Pages**
-Already hosted here:  
-https://abhinavtiwari11.github.io/abhinav-recipe-app/
-
----
+Add, edit, and delete recipes
+Search by title
+Filter by difficulty (All / Easy / Medium / Hard)
+Optional filter: max prep time
+Clean detail view with image, ingredients, and steps
+Fully responsive layout (mobile + desktop)
+Data saved locally in the browser
 
 ## 🗄️ Data Structure in localStorage
 
@@ -58,8 +55,6 @@ All recipes are stored in:
 ]
 
 
-
-Optional
 🧠 Assumptions & Limitations
 Assumptions
 
