@@ -1,34 +1,27 @@
-// app.js - modular single-file SPA using localStorage
+/* ============================
+   CONFIG + HELPERS
+============================ */
 const STORAGE_KEY = "recipes_v1";
 
 const qs = (sel) => document.querySelector(sel);
 const qsa = (sel) => Array.from(document.querySelectorAll(sel));
 
 function uid() {
-  return "r_" + Math.random().toString(36).slice(2, 9);
+  return "r_" + Math.random().toString(36).slice(2, 10);
 }
 
-// Infer Veg / Non-Veg from the title (for new / old recipes)
-function inferTypeFromTitle(title = "") {
-  const t = title.toLowerCase();
-  const nonVegKeywords = [
-    "chicken",
-    "egg",
-    "mutton",
-    "fish",
-    "prawn",
-    "shrimp",
-    "beef",
-    "meat",
-    "lamb",
-    "keema",
-  ];
-  return nonVegKeywords.some((k) => t.includes(k)) ? "Non-Veg" : "Veg";
+function inferTypeFromTitle(t = "") {
+  t = t.toLowerCase();
+  return ["chicken", "mutton", "egg", "meat", "fish", "beef", "prawn", "shrimp"]
+    .some(k => t.includes(k))
+    ? "Non-Veg"
+    : "Veg";
 }
 
-/* --- Initial seed data --- */
+/* ============================
+   SEED RECIPES
+============================ */
 const seedRecipes = [
-  /* Paneer Tikka */
   {
     id: uid(),
     title: "Paneer Tikka",
@@ -57,9 +50,9 @@ const seedRecipes = [
     imageUrl:
       "https://www.indianveggiedelight.com/wp-content/uploads/2021/08/air-fryer-paneer-tikka-featured.jpg",
     type: "Veg",
+    reviews: []
   },
 
-  /* Vegetable Fried Rice */
   {
     id: uid(),
     title: "Vegetable Fried Rice",
@@ -96,9 +89,9 @@ const seedRecipes = [
     imageUrl:
       "https://www.simplyrecipes.com/thmb/g9QkoMz7Aq3oAXnbtZ6H32nsH18=/2000x1335/filters:fill(auto,1)/__opt__aboutcom__coeus__resources__content_migration__simply_recipes__uploads__2018__07__Veggie-Fried-Rice-LEAD-HORIZONTAL-5f6ac64a24b44f9ebd4b3ef854747f4a.jpg",
     type: "Veg",
+    reviews: []
   },
 
-  /* Simple Tomato Pasta */
   {
     id: uid(),
     title: "Simple Tomato Pasta",
@@ -126,9 +119,9 @@ const seedRecipes = [
     difficulty: "Easy",
     imageUrl: "pasta.jpg",
     type: "Veg",
+    reviews: []
   },
 
-  /* Hearty Lentil Soup */
   {
     id: uid(),
     title: "Hearty Lentil Soup",
@@ -158,9 +151,9 @@ const seedRecipes = [
     difficulty: "Easy",
     imageUrl: "lentilsoup.png",
     type: "Veg",
+    reviews: []
   },
 
-  /* Spicy Chickpea Curry */
   {
     id: uid(),
     title: "Spicy Chickpea Curry",
@@ -190,362 +183,524 @@ const seedRecipes = [
     difficulty: "Medium",
     imageUrl: "chickpea.jpg",
     type: "Veg",
+    reviews: []
   },
-  /* Spicy Chicken Curry (Non-Veg) */
+
   {
     id: uid(),
     title: "Spicy Chicken Curry",
     description:
       "A flavorful, spicy Indian chicken curry cooked with onions, tomatoes, and aromatic spices.",
     ingredients: [
-      "500g chicken (bone-in or boneless)",
+      "500g chicken",
       "2 onions (finely chopped)",
-      "2 tomatoes (pureed or chopped)",
+      "2 tomatoes (pureed)",
       "1 tbsp ginger-garlic paste",
       "2 tbsp oil",
       "1 tsp cumin seeds",
-      "1/2 tsp turmeric powder",
+      "1/2 tsp turmeric",
       "1 tsp red chili powder",
       "1 tsp coriander powder",
       "1 tsp garam masala",
       "Salt to taste",
-      "Fresh coriander leaves for garnish",
+      "Fresh coriander for garnish",
     ],
     steps: [
-      "Heat oil in a pan and add cumin seeds.",
-      "Add chopped onions and sauté until golden brown.",
-      "Add ginger-garlic paste and sauté for 30 seconds.",
-      "Add tomato puree and cook until oil separates.",
-      "Add turmeric, chili powder, coriander powder, and salt. Mix well.",
-      "Add the chicken pieces and stir until coated with masala.",
-      "Cover and cook on medium heat for 10–12 minutes.",
-      "Add 1 cup water, mix, and simmer for 10 more minutes.",
-      "Finish with garam masala and fresh coriander leaves.",
-      "Serve hot with rice or roti.",
+      "Heat oil and add cumin seeds.",
+      "Add onions and sauté until golden.",
+      "Add ginger-garlic paste.",
+      "Add tomato puree and spices.",
+      "Add chicken and mix well.",
+      "Cover and cook 12 minutes.",
+      "Add water and simmer 10 minutes.",
+      "Serve hot.",
     ],
     prepTime: 15,
     cookTime: 30,
     difficulty: "Medium",
     imageUrl: "chickencurry.jpg",
     type: "Non-Veg",
+    reviews: []
   },
 ];
 
-/* --- Storage helpers --- */
+/* ============================
+   STORAGE
+============================ */
 function safeParse(raw) {
   try {
     const v = JSON.parse(raw);
     return Array.isArray(v) ? v : null;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
 
 function loadRecipes() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  const parsed = raw ? safeParse(raw) : null;
+  const parsed = safeParse(raw);
+
   if (!parsed) {
-    // fresh seed + ensure type is set
-    const seeded = seedRecipes.map((r) => ({
+    const initial = seedRecipes.map(r => ({
       ...r,
-      type: r.type || inferTypeFromTitle(r.title),
+      reviews: r.reviews || []
     }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
-    return seeded.slice();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    return initial;
   }
-  // upgrade old data with missing type
-  const upgraded = parsed.map((r) => ({
+
+  return parsed.map(r => ({
     ...r,
     type: r.type || inferTypeFromTitle(r.title),
+    reviews: r.reviews || []
   }));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(upgraded));
-  return upgraded;
 }
 
-function saveRecipes(arr) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
 }
 
-/* --- App state --- */
+/* ============================
+   STATE
+============================ */
 let recipes = loadRecipes();
 let editingId = null;
 
-/* --- DOM elements --- */
+/* ============================
+   DOM ELEMENTS
+============================ */
 const recipesGrid = qs("#recipesGrid");
 const searchInput = qs("#searchInput");
 const difficultyFilter = qs("#difficultyFilter");
 const maxTimeFilter = qs("#maxTimeFilter");
 const addRecipeBtn = qs("#addRecipeBtn");
+const detailView = qs("#detailView");
+const homeView = qs("#homeView");
+const formView = qs("#formView");
+const recipeDetail = qs("#recipeDetail");
+const backToListBtn = qs("#backToListBtn");
+const recipeForm = qs("#recipeForm");
+const cancelFormBtn = qs("#cancelFormBtn");
+const deleteBtn = qs("#deleteBtn");
+const reviewPopup = qs("#reviewPopup");
 
-// Create Veg / Non-Veg filter dropdown dynamically (keeps HTML file unchanged)
-const controlsBar = qs(".controls");
+/* ============================
+   VEG FILTER DROPDOWN
+============================ */
 const vegFilter = document.createElement("select");
 vegFilter.id = "vegFilter";
 vegFilter.innerHTML = `
-  <option value="All">All</option>
-  <option value="Veg">Veg</option>
-  <option value="Non-Veg">Non-Veg</option>
+<option value="All">All</option>
+<option value="Veg">Veg</option>
+<option value="Non-Veg">Non-Veg</option>
 `;
-if (controlsBar && maxTimeFilter) {
-  controlsBar.insertBefore(vegFilter, maxTimeFilter);
-} else if (controlsBar) {
-  controlsBar.appendChild(vegFilter);
-}
+qs(".controls").insertBefore(vegFilter, maxTimeFilter);
+
 vegFilter.addEventListener("change", () => {
-  if (vegFilter.value === "Veg") {
-    vegFilter.style.color = "green";
-  } else if (vegFilter.value === "Non-Veg") {
-    vegFilter.style.color = "red";
-  } else {
-    vegFilter.style.color = "black";
-  }
+  vegFilter.style.color =
+    vegFilter.value === "Veg"
+      ? "green"
+      : vegFilter.value === "Non-Veg"
+      ? "red"
+      : "black";
 });
-vegFilter.style.color = "black";
 
-const homeView = qs("#homeView");
-const detailView = qs("#detailView");
-const formView = qs("#formView");
-
-const backToListBtn = qs("#backToListBtn");
-const recipeDetail = qs("#recipeDetail");
-
-const recipeForm = qs("#recipeForm");
-const formTitle = qs("#formTitle");
-const deleteBtn = qs("#deleteBtn");
-const cancelFormBtn = qs("#cancelFormBtn");
-
-/* --- Rendering --- */
-function formatTime(mins) {
-  return mins ? mins + " min" : "-";
+/* ============================
+   UTILITIES
+============================ */
+function showView(v) {
+  [homeView, detailView, formView].forEach(x => x.classList.add("hidden"));
+  v.classList.remove("hidden");
 }
 
+function format(min) {
+  return min ? `${min} min` : "-";
+}
+
+function avgRating(rev) {
+  if (!rev.length) return "No rating";
+  return (
+    rev.reduce((a,b) => a + Number(b.rating), 0) / rev.length
+  ).toFixed(1);
+}
+
+/* ============================
+   HOME GRID
+============================ */
 function renderGrid(list) {
   recipesGrid.innerHTML = "";
+
   if (!list.length) {
-    recipesGrid.innerHTML =
-      '<p class="card">No recipes found. Try adding one.</p>';
+    recipesGrid.innerHTML = `<p class="card">No recipes found.</p>`;
     return;
   }
-  list.forEach((r) => {
+
+  list.forEach(r => {
     const card = document.createElement("div");
     card.className = "card";
-
-    // FIX ADDED BELOW
     card.dataset.id = r.id;
 
-    if (r.imageUrl)
-      card.innerHTML = `<img src="${r.imageUrl}" alt="${r.title}">`;
-    card.innerHTML += `
+    card.innerHTML = `
+      ${r.imageUrl ? `<img src="${r.imageUrl}">` : ""}
       <h3>${r.title}</h3>
       <p>${r.description}</p>
 
       <div class="recipe-meta">
-        <span class="tag">${r.type || "Veg"}</span>
+        <span class="tag">${r.type}</span>
         <span class="tag">${r.difficulty}</span>
-        <span class="tag">Prep: ${formatTime(r.prepTime)}</span>
+        <span class="tag">⭐ ${avgRating(r.reviews)}</span>
+        <span class="tag">Prep: ${format(r.prepTime)}</span>
       </div>
 
       <div class="actions">
         <button class="btn view" data-id="${r.id}">View</button>
         <button class="btn edit" data-id="${r.id}">Edit</button>
-      </div>`;
-      
+        <button class="btn export" data-id="${r.id}">📄</button>
+        <button class="btn print" data-id="${r.id}">🖨️</button>
+        <button class="btn share" data-id="${r.id}">🔗</button>
+      </div>
+    `;
+
     recipesGrid.appendChild(card);
   });
 }
 
-
-/* --- Filters & Search --- */
-function applyFilters() {
-  const q = searchInput.value.trim().toLowerCase();
-  const diff = difficultyFilter.value;
-  const maxTime = parseInt(maxTimeFilter.value) || Infinity;
-  const veg = vegFilter ? vegFilter.value : "All";
-
-  let list = recipes.filter((r) => {
-    const matchesQ = r.title.toLowerCase().includes(q);
-    const matchesDiff = diff === "All" || r.difficulty === diff;
-    const typeValue = r.type || inferTypeFromTitle(r.title);
-    const matchesVeg = veg === "All" || typeValue === veg;
-    const matchesTime = r.prepTime <= maxTime;
-    return matchesQ && matchesDiff && matchesVeg && matchesTime;
-  });
-  renderGrid(list);
-}
-
-/* --- View management --- */
-function showView(view) {
-  [homeView, detailView, formView].forEach((v) => v.classList.add("hidden"));
-  view.classList.remove("hidden");
-}
-
-/* --- Handlers --- */
-function onGridClick(e) {
-  const id =
-    e.target.dataset.id ||
-    e.target.closest(".card")?.dataset.id;
-
-  if (!id) return;
-
-  if (e.target.classList.contains("edit")) {
-    openFormForEdit(id);
-  } else if (e.target.classList.contains("view")) {
-    openDetail(id);
-  } else {
-    // Clicking any empty area of the card opens detail
-    openDetail(id);
-  }
-}
-
-
+/* ============================
+   DETAIL VIEW
+============================ */
 function openDetail(id) {
-  const r = recipes.find((x) => x.id === id);
-  if (!r) return alert("Recipe not found.");
-  recipeDetail.innerHTML = "";
-  const detail = document.createElement("div");
-  const typeValue = r.type || inferTypeFromTitle(r.title);
-  detail.innerHTML = `
-    ${r.imageUrl ? `<img src="${r.imageUrl}" alt="${r.title}">` : ""}
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  recipeDetail.innerHTML = `
+    ${r.imageUrl ? `<img src="${r.imageUrl}">` : ""}
     <h2>${r.title}</h2>
     <p>${r.description}</p>
+
     <div class="meta-row">
-      <div class="tag">${typeValue}</div>
-      <div class="tag">${r.difficulty}</div>
-      <div class="tag">Prep: ${formatTime(r.prepTime)}</div>
-      <div class="tag">Cook: ${formatTime(r.cookTime || 0)}</div>
+      <span class="tag">${r.type}</span>
+      <span class="tag">${r.difficulty}</span>
+      <span class="tag">⭐ ${avgRating(r.reviews)}</span>
+      <span class="tag">Prep: ${format(r.prepTime)}</span>
+      <span class="tag">Cook: ${format(r.cookTime)}</span>
     </div>
+
     <h4>Ingredients</h4>
-    <ul>${r.ingredients.map((i) => `<li>${i}</li>`).join("")}</ul>
+    <ul>${r.ingredients.map(i => `<li>${i}</li>`).join("")}</ul>
+
     <h4>Steps</h4>
-    <ol>${r.steps.map((s) => `<li>${s}</li>`).join("")}</ol>
+    <ol>${r.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+
+    <button id="reviewBtn" class="btn view" data-id="${r.id}">Rate & Review</button>
+
+    <h3>Reviews</h3>
+    <div id="reviewsList">
+      ${
+        r.reviews.length
+          ? r.reviews
+              .map(rv => `<div class="review-card"><strong>⭐ ${rv.rating}</strong><p>${rv.text}</p></div>`)
+              .join("")
+          : "<p>No reviews yet.</p>"
+      }
+    </div>
+
     <div class="actions">
       <button class="btn edit" data-id="${r.id}">Edit</button>
       <button class="btn delete" data-id="${r.id}">Delete</button>
-    </div>`;
-  recipeDetail.appendChild(detail);
+      <button class="btn print" data-id="${r.id}">🖨️</button>
+      <button class="btn export" data-id="${r.id}">📄</button>
+
+      <button class="btn share" data-id="${r.id}">🔗</button>
+    </div>
+  `;
+
+  document.getElementById("reviewBtn").onclick = () => openReviewPopup(id);
+
   showView(detailView);
 }
 
-/* --- Form actions --- */
-function openFormForAdd() {
-  editingId = null;
-  formTitle.textContent = "Add Recipe";
-  recipeForm.reset();
-  deleteBtn.classList.add("hidden");
-  clearErrors();
-  showView(formView);
-}
+/* ============================
+   REVIEW POPUP
+============================ */
+function openReviewPopup(id) {
+  reviewPopup.classList.remove("hidden");
 
-function openFormForEdit(id) {
-  const r = recipes.find((x) => x.id === id);
-  if (!r) return alert("Recipe not found.");
-  editingId = id;
-  formTitle.textContent = "Edit Recipe";
-  qs("#title").value = r.title;
-  qs("#description").value = r.description;
-  qs("#ingredients").value = r.ingredients.join("\n");
-  qs("#steps").value = r.steps.join("\n");
-  qs("#prepTime").value = r.prepTime;
-  qs("#cookTime").value = r.cookTime || "";
-  qs("#difficulty").value = r.difficulty;
-  qs("#imageUrl").value = r.imageUrl || "";
-  deleteBtn.classList.remove("hidden");
-  clearErrors();
-  showView(formView);
-}
+  qs("#saveReviewBtn").onclick = () => {
+    const rating = Number(qs("#reviewRating").value);
+    const text = qs("#reviewText").value.trim();
+    if (!text) return alert("Enter review");
 
-function deleteRecipeById(id) {
-  if (!confirm("Delete this recipe?")) return;
-  recipes = recipes.filter((r) => r.id !== id);
-  saveRecipes(recipes);
-  applyFilters();
-  showView(homeView);
-}
+    recipes = recipes.map(r =>
+      r.id === id ? { ...r, reviews: [...r.reviews, { rating, text }] } : r
+    );
 
-/* --- Validation --- */
-function clearErrors() {
-  qsa(".error").forEach((el) => (el.textContent = ""));
-}
-
-function validateForm(data) {
-  const errors = {};
-  if (!data.title) errors.title = "Title is required.";
-  if (!data.description) errors.description = "Description is required.";
-  if (!Array.isArray(data.ingredients) || data.ingredients.length === 0)
-    errors.ingredients = "Add at least one ingredient.";
-  if (!Array.isArray(data.steps) || data.steps.length === 0)
-    errors.steps = "Add at least one step.";
-  if (
-    data.prepTime == null ||
-    data.prepTime === "" ||
-    isNaN(Number(data.prepTime))
-  )
-    errors.prepTime = "Prep time is required.";
-  if (!data.difficulty) errors.difficulty = "Select difficulty.";
-  return errors;
-}
-
-/* --- Save handler --- */
-recipeForm.addEventListener("submit", (ev) => {
-  ev.preventDefault();
-  clearErrors();
-  const titleValue = qs("#title").value.trim();
-  const formData = {
-    title: titleValue,
-    description: qs("#description").value.trim(),
-    ingredients: qs("#ingredients")
-      .value.trim()
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    steps: qs("#steps")
-      .value.trim()
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    prepTime: parseInt(qs("#prepTime").value) || 0,
-    cookTime: parseInt(qs("#cookTime").value) || 0,
-    difficulty: qs("#difficulty").value,
-    imageUrl: qs("#imageUrl").value.trim(),
-    type: inferTypeFromTitle(titleValue),
+    save();
+    qs("#reviewText").value = "";
+    reviewPopup.classList.add("hidden");
+    openDetail(id);
   };
-  const errors = validateForm(formData);
-  if (Object.keys(errors).length) {
-    Object.entries(errors).forEach(([k, v]) => {
-      const el = qs(`.error[data-for="${k}"]`);
-      if (el) el.textContent = v;
-    });
+
+  qs("#closeReviewBtn").onclick = () =>
+    reviewPopup.classList.add("hidden");
+}
+
+/* ============================
+   ACTIONS
+============================ */
+function printRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  const w = window.open("", "_blank", "width=800,height=600");
+
+  w.document.write(`
+    <html>
+    <head>
+      <title>${r.title} - Print</title>
+      <style>
+        body { font-family: Arial; padding: 20px; }
+        h1 { margin-bottom: 10px; }
+        .meta { margin-bottom: 15px; }
+        ul, ol { margin-left: 20px; }
+        img { max-width: 300px; margin-bottom: 20px; }
+      </style>
+    </head>
+
+    <body>
+      ${r.imageUrl ? `<img src="${r.imageUrl}">` : ""}
+
+      <h1>${r.title}</h1>
+      <p>${r.description}</p>
+
+      <div class="meta">
+        <p><strong>Type:</strong> ${r.type}</p>
+        <p><strong>Difficulty:</strong> ${r.difficulty}</p>
+        <p><strong>Prep Time:</strong> ${r.prepTime} min</p>
+        <p><strong>Cook Time:</strong> ${r.cookTime} min</p>
+      </div>
+
+      <h2>Ingredients</h2>
+      <ul>
+        ${r.ingredients.map(i => `<li>${i}</li>`).join("")}
+      </ul>
+
+      <h2>Steps</h2>
+      <ol>
+        ${r.steps.map(s => `<li>${s}</li>`).join("")}
+      </ol>
+
+      <script>
+        window.print();
+      </script>
+    </body>
+    </html>
+  `);
+
+  w.document.close();
+}
+
+
+function exportRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+   const fullRecipe = {
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    type: r.type,
+    difficulty: r.difficulty,
+    prepTime: r.prepTime,
+    cookTime: r.cookTime,
+    imageUrl: r.imageUrl,
+    ingredients: r.ingredients || [],
+    steps: r.steps || [],
+    reviews: r.reviews || []
+  };
+  const blob = new Blob([JSON.stringify(r, null, 2)], {
+    type: "application/json"
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${r.title}.json`;
+  a.click();
+}
+
+function shareRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  // Build full share text
+  const fullText = `
+${r.title}
+
+${r.description}
+
+Ingredients:
+${r.ingredients.map(i => "- " + i).join("\n")}
+
+Steps:
+${r.steps.map((s, i) => (i + 1) + ". " + s).join("\n")}
+
+Prep Time: ${r.prepTime} min
+Cook Time: ${r.cookTime} min
+Difficulty: ${r.difficulty}
+Type: ${r.type}
+
+Link: ${window.location.href + "#recipe-" + r.id}
+`.trim();
+
+  const shareData = {
+    title: r.title,
+    text: fullText
+  };
+
+  if (navigator.share) {
+    navigator
+      .share(shareData)
+      .catch(() => {});
+  } else {
+    // Fallback: Copy to clipboard
+    navigator.clipboard.writeText(fullText);
+    alert("Sharing not supported — full recipe copied to clipboard!");
+  }
+}
+
+/* ============================
+   GRID CLICK HANDLERS
+============================ */
+recipesGrid.addEventListener("click", (e) => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+
+  const id = card.dataset.id;
+
+  // If clicked a button → allow normal actions
+  if (e.target.tagName === "BUTTON" || e.target.closest("button")) {
+    const btn = e.target.closest("button");
+    const bid = btn.dataset.id;
+    if (!bid) return;
+
+    if (btn.classList.contains("view")) openDetail(bid);
+    if (btn.classList.contains("edit")) openForm(bid);
+    if (btn.classList.contains("delete")) deleteRecipe(bid);
+    if (btn.classList.contains("print")) printRecipe(bid);
+    if (btn.classList.contains("export")) exportRecipe(bid);
+    if (btn.classList.contains("share")) shareRecipe(bid);
     return;
   }
 
+  // CLICK ANYWHERE ON CARD → OPEN DETAIL
+  openDetail(id);
+});
+
+
+recipeDetail.addEventListener("click", (e) => {
+  const id = e.target.dataset.id;
+  if (!id) return;
+
+  if (e.target.classList.contains("edit")) openForm(id);
+  if (e.target.classList.contains("delete")) deleteRecipe(id);
+  if (e.target.classList.contains("print")) printRecipe(id);
+  if (e.target.classList.contains("export")) exportRecipe(id);
+
+  if (e.target.classList.contains("share")) shareRecipe(id);
+});
+
+/* ============================
+   FORM
+============================ */
+function openForm(id = null) {
+  editingId = id;
+
+  if (id) {
+    const r = recipes.find(x => x.id === id);
+
+    qs("#title").value = r.title;
+    qs("#description").value = r.description;
+    qs("#ingredients").value = r.ingredients.join("\n");
+    qs("#steps").value = r.steps.join("\n");
+    qs("#prepTime").value = r.prepTime;
+    qs("#cookTime").value = r.cookTime;
+    qs("#difficulty").value = r.difficulty;
+    qs("#imageUrl").value = r.imageUrl;
+
+    deleteBtn.classList.remove("hidden");
+    qs("#formTitle").textContent = "Edit Recipe";
+  } else {
+    recipeForm.reset();
+    deleteBtn.classList.add("hidden");
+    qs("#formTitle").textContent = "Add Recipe";
+  }
+
+  showView(formView);
+}
+
+recipeForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const data = {
+    title: qs("#title").value.trim(),
+    description: qs("#description").value.trim(),
+    ingredients: qs("#ingredients").value.split("\n").map(s => s.trim()).filter(Boolean),
+    steps: qs("#steps").value.split("\n").map(s => s.trim()).filter(Boolean),
+    prepTime: Number(qs("#prepTime").value),
+    cookTime: Number(qs("#cookTime").value),
+    difficulty: qs("#difficulty").value,
+    imageUrl: qs("#imageUrl").value.trim(),
+    type: inferTypeFromTitle(qs("#title").value),
+  };
+
   if (editingId) {
-    recipes = recipes.map((r) =>
-      r.id === editingId ? { ...r, ...formData, id: editingId } : r
+    recipes = recipes.map(r =>
+      r.id === editingId
+        ? { ...r, ...data, reviews: r.reviews }
+        : r
     );
   } else {
-    recipes.unshift({ ...formData, id: uid() });
+    recipes.unshift({ ...data, id: uid(), reviews: [] });
   }
-  saveRecipes(recipes);
+
+  save();
   applyFilters();
   showView(homeView);
 });
 
-/* --- Delete from form --- */
 deleteBtn.addEventListener("click", () => {
   if (!editingId) return;
-  deleteRecipeById(editingId);
+  deleteRecipe(editingId);
 });
 
-/* --- Delegated handlers --- */
-recipesGrid.addEventListener("click", onGridClick);
-recipeDetail.addEventListener("click", (e) => {
-  const id = e.target.dataset.id;
-  if (!id) return;
-  if (e.target.classList.contains("edit")) openFormForEdit(id);
-  if (e.target.classList.contains("delete")) deleteRecipeById(id);
-});
+function deleteRecipe(id) {
+  if (!confirm("Delete recipe?")) return;
 
-addRecipeBtn.addEventListener("click", openFormForAdd);
+  recipes = recipes.filter(x => x.id !== id);
+  save();
+  applyFilters();
+  showView(homeView);
+}
+
+/* ============================
+   FILTERS
+============================ */
+function applyFilters() {
+  const q = searchInput.value.trim().toLowerCase();
+  const diff = difficultyFilter.value;
+  const max = Number(maxTimeFilter.value) || Infinity;
+  const type = vegFilter.value;
+
+  const list = recipes.filter(r =>
+    r.title.toLowerCase().includes(q) &&
+    (diff === "All" || r.difficulty === diff) &&
+    (type === "All" || r.type === type) &&
+    r.prepTime <= max
+  );
+
+  renderGrid(list);
+}
+
+/* ============================
+   INIT
+============================ */
+addRecipeBtn.addEventListener("click", () => openForm());
 backToListBtn.addEventListener("click", () => showView(homeView));
 cancelFormBtn.addEventListener("click", () => showView(homeView));
 
@@ -554,15 +709,6 @@ difficultyFilter.addEventListener("change", applyFilters);
 maxTimeFilter.addEventListener("input", applyFilters);
 vegFilter.addEventListener("change", applyFilters);
 
-/* --- Init --- */
-function init() {
-  try {
-    recipes = loadRecipes();
-  } catch (e) {
-    localStorage.removeItem(STORAGE_KEY);
-    recipes = loadRecipes();
-  }
-  applyFilters();
-}
+applyFilters();
 
-init();
+
